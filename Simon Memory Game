@@ -1,0 +1,336 @@
+JAVASCRIPT FUNCTIONALITY ->
+const topL = document.querySelector('.green');
+const topR = document.querySelector('.red');
+const botR = document.querySelector('.blue');
+const botL = document.querySelector('.yellow');
+const start = document.querySelector('.start');
+const onbutton = document.querySelector('.dot');
+const displayScore =  document.querySelector('.rdisplay');
+const highScore =  document.querySelector('.ldisplay');
+
+
+
+let order = []; //an array representing colors that flash
+let playerOrder = []; //the colors the player picks
+let flash; // number of flashes that occured - int
+let turn; // tracks what turn the player is on - int
+let good; //tracks if the player made a mistake - boolean
+let compTurn; //when the machine is generating an array
+let intervalId; // used to call the game later
+let on=false; // boolean representing players turn, if not on cannot press buttons
+let z = 0; //placeholder for high score
+
+start.addEventListener('click', (event) => {
+    onbutton.style.backgroundColor = "green"; //changes the red dot to green
+    setTimeout(() =>{    // starts the game 3 seconds after the light turns green
+        play();
+    }, 300);  
+
+
+})
+function play(){
+    order = []; //sets order array to empty at start of the game
+    playerOrder = []; // same thing with player array
+    flash= 0;  //no flashes yet
+    intervalId=0;
+    turn=1;  //first turn 
+    displayScore.innerHTML = turn;//prints out the score
+    good=true; //no mistakes yet
+    on=true; //players turn
+    /* the for loop fills the array with random numbers between 1 and 4
+    each number represents a color in gameturn method
+    this loop continues until the player makes a mistake or reaches turn 99
+    */
+    for(var i = 0;i<20;i++){
+        order.push(Math.floor(Math.random() * 4) + 1) //generates a random int between
+                                                      //1 and 4
+    }
+    compTurn = true;
+    if(order.length<5){ 
+    intervalId = setInterval(gameTurn, 800); //flashes a color every 500 ms
+    }
+    
+    else if(order.length>=5 && order.length<9){
+        intervalId = setInterval(gameTurn, 400); //flashes a color every 400 ms 
+    }
+    else{ 
+        intervalId = setInterval(gameTurn, 300); //flashes a color every 300 ms
+        }
+}
+function gameTurn() {
+    on=false;
+
+    if(flash==turn){ // player has caught up to computer  
+        clearInterval(intervalId);  
+        compTurn = false; //no longer the computers turn 
+        clearColor(); // resets colors to orginal blue green etc
+        on=true; // player can now press buttons
+    }
+
+    if(compTurn){ //computers turn
+        clearColor(); // resets colors
+        setTimeout(() => {
+         if(order[flash] == 1) one(); //flashes green
+         if(order[flash] == 2) two();//flashed red
+         if(order[flash] == 3) three();//flashes yellow
+         if(order[flash] == 4) four();//flashes blue
+         flash++; //flashes a random color every 200 ms
+         //increments flash by 1
+        }, 200)
+    }
+}
+/*
+changes the color selected to white when called
+*/
+function one() {
+    topL.style.backgroundColor = "white";
+}
+function two() {
+    topR.style.backgroundColor = "white";
+}
+function three() {
+    botL.style.backgroundColor = "white";
+}
+function four() {
+    botR.style.backgroundColor = "white";
+}
+/* 
+changes the color back to its original appearance
+ie white -> green/blue/red/yellow
+*/
+function clearColor(){
+    topL.style.backgroundColor = "green";
+    topR.style.backgroundColor = "red";
+    botL.style.backgroundColor = "yellow";
+    botR.style.backgroundColor = "blue";
+}
+/*if the player clicks the top left button then 
+    -the check method is called to see if the player chose the correct color
+    -one method is called to flash the chosen color white, in this case the top left color green
+    -the color is then reset back to green after 300 ms
+    This process is then repeated for blue yellow and red.
+*/
+topL.addEventListener('click', (event) => {
+   if(on){ 
+        playerOrder.push(1);
+        check();
+        one();
+            setTimeout(() => {
+                clearColor();
+            }, 300);
+    }
+})
+
+topR.addEventListener('click', (event) => {
+    if(on){ 
+         playerOrder.push(2);
+        check();
+         two();
+             setTimeout(() => {
+                 clearColor();
+             }, 300)
+     }
+ })
+
+ botL.addEventListener('click', (event) => {
+    if(on){ 
+         playerOrder.push(3);
+         check();
+         three();
+             setTimeout(() => {
+                 clearColor();
+             }, 300);
+
+     }
+ })
+ botR.addEventListener('click', (event) => {
+    if(on){ 
+         playerOrder.push(4);
+         check();
+         four();
+             setTimeout(() => {
+                 clearColor();
+             }, 300);
+     }
+ })
+
+function check(){
+    if(playerOrder[playerOrder.length-1] !== order[playerOrder.length-1]) //checks if player array is the sam,e as game array 
+    good = false; // the player failed to match the given sequence
+
+    if(good == false){ //if the player makes a mistake the game ends
+        for(var i = 0; i< 5 ; i++){ 
+            flashfive(); //for loop to call the method 5 times
+         }    //method makes colors flash five times indicating a mistake
+         onbutton.style.backgroundColor = "red";//resets the on botton to red
+    } 
+    if (turn == playerOrder.length && good){
+        turn++; //increases the score by 1 also lets computer know to add 1 more color to order array
+    playerOrder = []; //resets player order to empty as the seqeunce starts again
+    compTurn = true; //if the player cathces up to the computer array it switches back to the computers turn
+    flash = 0; //resets flash counter to zero
+    intervalId = setInterval(gameTurn, 800); //calls the game turn method after 800ms
+    displayScore.innerHTML = turn; //updates the score being displayed
+    if(z<turn){
+        z=turn; //replaces current score with the highscore if its higher
+    }
+    highScore.innerHTML = z; //dispays highest score
+    
+    }
+}
+function flashfive(){
+    topL.style.backgroundColor = "white"; //sets all colors to white 
+    topR.style.backgroundColor = "white";
+    botL.style.backgroundColor = "white";
+    botR.style.backgroundColor = "white";
+    setTimeout(() => {
+        clearColor(); //resets the colors to their original color after 300 ms
+    }, 300);
+  
+}
+
+/* Sources consulted :
+1)https://www.youtube.com/watch?v=eLY5KSXcQ6c
+
+2)https://www.youtube.com/watch?v=n_ec3eowFLQ&t=1331s
+
+3)https://www.youtube.com/watch?v=W0MxUHlZo6U
+*/
+
+CSS STYLING ->
+.panel{
+ background-color: black;
+}
+.start{
+        position: absolute;
+        width: 80px;
+        height: 100x;
+        border-radius: 2px;
+        border: transparent;
+        outline: none;
+        color: black;
+        cursor: pointer;
+        background: rgb(180, 174, 174);
+        margin: 280px 560px;
+        z-index: 1;
+        font-family:'Orbitron'
+}
+.left{
+    position: absolute;
+    width: 80px;
+    height: 100x;
+    border-radius: 10px;
+    border: transparent;
+    outline: none;
+    color: black;
+    cursor: pointer;
+    background: rgb(180, 174, 174);
+    margin: 280px 560px;
+    z-index: 2;
+}
+.base {
+    position: absolute;
+    height: 200px;
+    width: 200px;
+    margin: 180px 500px;
+    background-color: black;
+    border-radius: 50%;
+    display: inline-block;
+}
+.dot{
+position: absolute;
+height: 10px;
+width: 10px;
+margin: 310px 595px;
+background-color:red;
+border-radius: 50%;
+display: inline-block;
+}
+    .yellow{
+        position: absolute;
+        height: 130px;
+        width: 130px;
+        margin: 300px 420px;
+        background-color:yellow;
+        border-radius: 50%;
+        outline: solid;
+        outline-color: black;
+        outline-width: 5px;
+        display: inline-block;
+        z-index: 5; 
+        }
+        .green{
+    position: absolute;
+    height: 130px;
+    width: 130px;
+    margin: 120px 430px;
+    background-color:green;
+    outline: solid;
+    outline-color: black;
+    outline-width: 5px;
+    border-radius: 50%;
+    display: inline-block;
+    z-index: 2;
+    }
+    .blue{
+        position: absolute;
+        height: 130px;
+        width: 130px;
+        margin: 300px 650px;
+        background-color:blue;
+        border-radius: 50%;
+        outline: solid;
+        outline-color: black;
+        outline-width: 5px;
+        display: inline-block;
+        z-index: 3;
+        }
+.red{
+    position: absolute;
+    height: 130px;
+    width: 130px;
+    margin: 120px 650px;
+    background-color:red;
+    border-radius: 50%;
+    display: inline-block;
+    outline: solid;
+    outline-color: black;
+    outline-width: 5px;
+    z-index: 4;
+}
+.ldisplay{
+    position: absolute;
+    width: 27px;
+    height: 60x;
+    border-radius: 2px;
+    border: transparent;
+    outline: none;
+    color: black;
+    cursor: pointer;
+    background: rgb(180, 174, 174);
+    margin: 280px 530px;
+    z-index: 6;
+    font-family:'Orbitron'
+}
+.rdisplay{
+    position: absolute;
+    width: 27px;
+    height: 60x;
+    border-radius: 2px;
+    border: transparent;
+    outline: none;
+    color: black;
+    cursor: pointer;
+    background: rgb(180, 174, 174);
+    margin: 280px 643px;
+    z-index: 7;
+    font-family:'Orbitron'
+
+}
+.active{
+    position: absolute;
+    background-color: white;
+}
+
+
+
