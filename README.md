@@ -1,97 +1,51 @@
-const {MongoClient} = require('mongodb'); //connect to mongodb
+int y=250;            // Horizontal position of ball
+int direction_y=-2;    // Change in horizontal position each time draw() executed
+int x=150;            // Vertical position of ball
+int direction_x=-2;    // Change in horizontal position each time draw() executed
 
-async function main() {
-    const uri = "mongodb://localhost:27017"; //connects to the db
-    
-    const client= new MongoClient(uri);
+int lives=5;
+int score=0;
 
-    try{ 
-     await client.connect();
+void setup()
+{
+  size(400,400);                  // Create a window 400x400 pixels
+}
 
-//   await listDatabases(client);
-    //calls the create method
-    await createListing(client,
-        {
-            //input 
-            Title: "Dr",
-            Firstname: "Joshua",
-            Surname: "Michael",
-            Mobile: "0872018989",
-            email: "joshthedr@outlook.com",
-            AddressLine1: "Josh's house",
-            AddressLine2: "on Josh's street",
-            County: "Galway",
-            Eircode: "wfwfhwfofw",
-           
-        },
-      
-    );
-    
-
-    //calls the read method to match given 'firstname'
-    await readName(client, "Joshua");
-    //calls the update method
-    await updateCustomers(client, "Joshua", { firstName: "mark",email: "newmark@gmail.com",Title: "Mr" });
-    //calls delete method
-    await deleteName(client, "Joshua");
-    }catch (e) {
-        console.error(e);
-    }
-    finally{ 
-        await client.close();
-        }
- }
-
-
-
-main().catch(console.error);
-/*
-async function listDatabases(client){
-   const databasesList=await client.db().admin().listDatabases();
+void draw()
+{
+  background(255,255,255);        // Clear screen to white  
+  fill(0,255,0);                  // Set fill colour to red
+  rect(0,mouseY,20,120);     // Position rectangle using mouse
+  
+  fill(255,0,0);
+  ellipse(x,y,20,20);         // Draw blue disk centred on x,y with diameter 20
+ y=y+direction_y;
+  if(y<10)          direction_y=-direction_y;
+  if(y>(height-10)) direction_y=-direction_y;
+ x=x+direction_x;
+  if(x<10)          direction_x=-direction_x;
+  if(x>=(width-10)) direction_x=-direction_x;
+  
+  x=x+direction_x; // New position equals old position plus change in direction
+  if(x<10) direction_x=-direction_x; // Reverse direction if hit boundary
+  
+  
+  if(x<=10)  
+   {
+     direction_x=-direction_x; // Bounce
+     lives--;                  // Reduce lives by one  
+     if(lives==0) exit();      // If lives is zero then quit 
+   }
    
-   console.log("Database:");
-   databasesList.databases.forEach(db => console.log(` - ${db.name}`));
- Shows i successfully connected to db
-}
-*/
-
-async function createListing(client, newListing) {
-    const result=await client.db("Assigment5").collection("Customers").insertOne(newListing);
-    //creates a new collection with newListing as the input parameter for the data
-    console.log(`New listing created with the following id: ${result.insertedId}`);
-    //prints the id of the newly created collection to the terminal
-}
-
-//read function
-async function readName(client, nameOfListing) {
-    const result = await client.db("Assigment5").collection("Customers").findOne({ Firstnameame:nameOfListing  });
-    //sets result to the collection with the matching parameter Firstname
-    if (result) {
-        //if a match is found the result is printed to the terminal 
-        console.log(`Found a listing in the collection with the name '${nameOfListing}':`);
-        console.log(result);
-    } else {
-        console.log(`No listings found with the name '${nameOfListing}'`);
-    }
-}
-//update function
-async function updateCustomers(client, name1, name2) {
-    const result = await client.db("Assigment5").collection("Customers").updateOne({ name: name1 }, { $set: name2 });
-
-    console.log(`${result.matchedCount} document(s) matched the query criteria.`);
-    console.log(`${result.modifiedCount} document(s) was/were updated.`);
-}
-
-//delete function
-async function deleteName(client, name) {
-    //sets result to document matching perimeter firstName
-    const result = await client.db("Assigment5").collection("Customers").deleteOne({ Firtname: name });
-    console.log(`${result.deletedCount} document(s) was/were deleted.`);
-    //prints to terminal if successful
-}
-
-/*references
- ->https://www.youtube.com/watch?v=fbYExfeFsI0
- ->https://www.mongodb.com/docs/manual/indexes/?utm_source=compass&utm_medium=product#single-field
-
- */
+   
+if((x<=30)&&(abs(mouseY-y)<60)) // If ball has bit paddle then..
+  {
+    direction_x=-direction_x;             // Bounce
+    score++;                              // Increase score by one
+  }
+  
+  textSize(32);                
+  fill(0,0,255);
+  text(score, 10, 30);        // Display score
+  text(lives,width-30, 30);   // Display lives
+  }
